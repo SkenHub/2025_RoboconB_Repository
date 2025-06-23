@@ -82,6 +82,7 @@ void can_rceive(void){
 }
 
 void timer(void){//1秒ごとに実行
+	//mtr1,2を一秒正転して止める
 	if(mtr1_sg[0] == 1){
 		mtr[1].write(75);
 		mtr[2].write(75);
@@ -94,6 +95,7 @@ void timer(void){//1秒ごとに実行
 		send_data_DD[1] = 0;
 		mtr1_sg[0] = 3;
 	}
+	//mtr1,2を一秒反転して止める
 	if(mtr1_sg[1] == 1){
 		mtr[1].write(-75);
 		mtr[2].write(-75);
@@ -104,6 +106,7 @@ void timer(void){//1秒ごとに実行
 		mtr[2].write(0);
 		mtr1_sg[1] = 3;
 	}
+	//mtr1,2を一秒反転して止める
 	if(mtr1_sg[2] == 1){
 		mtr[1].write(-75);
 		mtr[2].write(-75);
@@ -114,6 +117,7 @@ void timer(void){//1秒ごとに実行
 		mtr[2].write(0);
 		mtr1_sg[2] = 3;
 	}
+	//一秒をカウント
 	if(mtr1_sg[3] == 1){
 		mtr1_sg[3] = 2;
 	}
@@ -123,6 +127,7 @@ void timer(void){//1秒ごとに実行
 }
 
 int main(void){
+	//モーターやエンコーダの設定
 	sken_system.init();
 	encoder[0].init(A0, A1, TIMER5);
 	encoder[1].init(B3, A5, TIMER2);
@@ -137,12 +142,15 @@ int main(void){
 	mtr[3].init(Apin,B14,TIMER12,CH1);
 	mtr[3].init(Bpin,B15,TIMER12,CH2);
 	SW.init(C13,INPUT_PULLUP);
+	//CAN設定
 	sken_system.startCanCommunicate(B13,B12,CAN_2);//CAN開始
 	sken_system.addCanRceiveInterruptFunc(CAN_2,&can_data_r);//CAN受信
+	//タイマ関数の使用
 	sken_system.addTimerInterruptFunc(can_rceive,3,1);
 	sken_system.addTimerInterruptFunc(main_interrupt, 1, 1);
 	sken_system.addTimerInterruptFunc(timer, 4, 1000);
 	while(1){
+		//エンコーダの値をリミット１でリセットできるようにする
 		for (int i = 0; i < 4; ++i) {
 			if(enc_data[i] < 0){
 				enc_sinti[i] = enc_org[i] - enc_data[i];
@@ -155,14 +163,15 @@ int main(void){
 		if(limitdata[0] == 1){
 			enc_org[0] = enc_data[0];
 		}
+		//マイコンのボタンでの実験用
 		if(SW.read() == 0){
-			botan_og[0] = 1;
+			botan_og[1] = 1;
 		}
 		else{
-			botan_og[0] = 0;
+			botan_og[1] = 0;
 		}
-		sken_system.canTransmit(CAN_2, 0x340, send_data_DD,6, 1);
-	    if(botan[0] == 1){
+		//ボタン１を押したときに実行
+	    if(botan[0] == 1){//1押し
             if(limitdata[0] != 1){
             	send_data_DD[0] = 1;
                 send_data_DD[1] = 1;
@@ -173,15 +182,15 @@ int main(void){
             	mtr1_sg[0] = 1;
             }
 		}
-		else if(botan[0] == 2){
+		else if(botan[0] == 2){//2押し
 			if(mtr1_sg[1] == 0){
 			    mtr1_sg[1] = 1;
 			}
-			if(enc_sinti[0]>=-310){
+			if(enc_sinti[0]>=-300){
 
 				mtr[0].write(-20);
 			}
-			else if(enc_sinti[0]<=-310){
+			else if(enc_sinti[0]<=-300){
 				mtr[0].write(0);
 			}
 		}
@@ -190,13 +199,14 @@ int main(void){
 	        mtr1_sg[1] = 0;
 	        botan[0] = 0;
 	    }
-	    if(botan[1] == 1 && mtr1_sg[2] == 0){
+	    //ボタン２を押したときに実行
+	    if(botan[1] == 1 && mtr1_sg[2] == 0){//1押し
 	    	mtr1_sg[2] = 1;
 	    }
-	    else if(botan[1] >= 2){
+	    else if(botan[1] >= 2){//2押し以上
 	    	if(((limitdata[1] == 0) || (limitdata[2] == 0)) && (mtr1_sg[3] == 0)){
-	    		mtr[1].write(-50);
-	    		mtr[2].write(-50);
+	    		mtr[1].write(50);
+	    		mtr[2].write(50);
 	    		mtr1_sg[3] = 1;
 	    		hantei = 1;
 	    	}
@@ -217,16 +227,18 @@ int main(void){
 	    	    hantei = 3;
 	    	}
 	    }
-	    if(botan[2] == 1){
+	    //ボタン３を押したときに実行
+	    if(botan[2] == 1){//1押し
 	    	send_data_DD[0] = 1;
 	    	send_data_DD[1] = 1;
 	    }
-	    else if(botan[2] == 2){
+	    else if(botan[2] == 2){//2押し
 	    	send_data_DD[0] = 0;
 	    	send_data_DD[1] = 0;
 	    	botan[2] = 0;
 	    }
-	    if(botan[3] == 1){
+	    //ボタン４を押したときに実行
+	    if(botan[3] == 1){//1押し
 	    	 if(enc_sinti[0]>=-150){
 	    	     mtr[0].write(-20);
 	    	 }
@@ -234,7 +246,7 @@ int main(void){
 	    	     mtr[0].write(0);
 	    	 }
 	    }
-	    if(botan[3] >= 2){
+	    else if(botan[3] >= 2){//2押し以上
 	    	 if(limitdata[0] != 1){
 	    	     mtr[0].write(20);
 	    	 }
@@ -243,5 +255,6 @@ int main(void){
 	    	     botan[3] = 0;
 	    	 }
 	    }
+	    sken_system.canTransmit(CAN_2, 0x340, send_data_DD,6, 1);//DDモジュールへ送信
 	}
 }
