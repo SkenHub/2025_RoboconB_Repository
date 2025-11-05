@@ -18,14 +18,14 @@ bool PS4::Getdata(PS4_data* ps4_data){
 	for(int i=0;i<8;i++){
 		ps4_data->rx_data[i] = rx_data_[i];
 		if(ps4_data->rx_data[i] == 0xa5 && ps4_data->rx_data[(i+1)%8] == 0xa5){
-			ps4_data->Right    = ((ps4_data->rx_data[(i+2)%8])&0x01) ? true:false;
-			ps4_data->Down     = ((ps4_data->rx_data[(i+2)%8])&0x02) ? true:false;
-			ps4_data->Left     = ((ps4_data->rx_data[(i+2)%8])&0x04) ? true:false;
-			ps4_data->Up       = ((ps4_data->rx_data[(i+2)%8])&0x08) ? true:false;
-			ps4_data->Square   = ((ps4_data->rx_data[(i+2)%8])&0x10) ? true:false;
-			ps4_data->Cross    = ((ps4_data->rx_data[(i+2)%8])&0x20) ? true:false;
-			ps4_data->Circle   = ((ps4_data->rx_data[(i+2)%8])&0x40) ? true:false;
-			ps4_data->Triangle = ((ps4_data->rx_data[(i+2)%8])&0x80) ? true:false;
+			ps4_data->Cross    = ((ps4_data->rx_data[(i+2)%8])&0x01) ? true:false;
+			ps4_data->Circle   = ((ps4_data->rx_data[(i+2)%8])&0x02) ? true:false;
+			ps4_data->Triangle = ((ps4_data->rx_data[(i+2)%8])&0x04) ? true:false;
+			ps4_data->Square   = ((ps4_data->rx_data[(i+2)%8])&0x08) ? true:false;
+			ps4_data->Up       = ((ps4_data->rx_data[(i+2)%8])&0x10) ? true:false;
+			ps4_data->Down     = ((ps4_data->rx_data[(i+2)%8])&0x20) ? true:false;
+			ps4_data->Left     = ((ps4_data->rx_data[(i+2)%8])&0x40) ? true:false;
+			ps4_data->Right    = ((ps4_data->rx_data[(i+2)%8])&0x80) ? true:false;
 			ps4_data->L1       = ((ps4_data->rx_data[(i+3)%8])&0x01) ? true:false;
 			ps4_data->R1       = ((ps4_data->rx_data[(i+3)%8])&0x02) ? true:false;
 			ps4_data->L2       = ((ps4_data->rx_data[(i+3)%8])&0x04) ? true:false;
